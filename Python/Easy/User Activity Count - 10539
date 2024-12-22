@@ -1,0 +1,7 @@
+# Import your libraries
+import pandas as pd
+
+# Start writing code
+df = activity_log.groupby('user_id')['activity_type'].nunique().reset_index()
+df = df.rename(columns={"activity_type" : "unique_activity_count"})
+df = df.merge(user_profiles[['user_id']], how='right', on='user_id').fillna(0)
