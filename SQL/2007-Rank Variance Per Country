@@ -20,5 +20,5 @@ WITH tb1 AS(
             *,
             LAG(ranking) OVER(PARTITION BY country ORDER BY month_created) AS last_month_rank
         FROM tb2)
-SELECT * FROM tb3
+SELECT country FROM tb3
 WHERE last_month_rank IS NOT NULL and ranking < last_month_rank
