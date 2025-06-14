@@ -1,0 +1,30 @@
+WITH 
+distinct_user_month AS( 
+    SELECT
+        DISTINCT user_id,
+        CAST(FORMAT(time_id, 'yyyy-MM-01') AS DATE) AS event_month
+    FROM fact_events),
+all_month AS(
+    SELECT 
+        DISTINCT CAST(FORMAT(time_id, 'yyyy-MM-01') AS DATE) AS event_month
+    FROM fact_events),
+total_cus AS(
+    SELECT 
+        am.event_month,
+        count(distinct dt.user_id) AS total_customer
+    FROM all_month am 
+        LEFT JOIN distinct_user_month dt
+        ON am.event_month >= dt.event_month
+    GROUP BY am.event_month),
+details AS(
+    SELECT 
+        event_month,
+        total_customer,
+        total_customer - COALESCE(LAG(total_customer) OVER(ORDER BY event_month), 0) as new_cus,
+        COALESCE(LAG(total_customer) OVER(ORDER BY event_month), 0) as exist_cus
+    FROM total_cus)
+SELECT 
+    event_month, 
+    ROUND(CAST(new_cus AS FLOAT)/total_customer,2) AS new_cus_ratio,
+    ROUND(CAST(exist_cus AS FLOAT)/total_customer,2) AS exist_cus_ratio
+FROM details
