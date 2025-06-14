@@ -1,0 +1,35 @@
+-- Count for number of event of each user_id within the event_type list 
+WITH
+event_count AS (
+    SELECT
+        user_id,
+        count(*) AS total_event
+    FROM fact_events
+    WHERE event_type IN ('video call received', 'video call sent', 'voice call received', 'voice call sent')
+    GROUP BY user_id),
+-- Find the percentage of each client_id that each user uses
+client_event_count AS(
+    SELECT
+        user_id,
+        client_id,
+        count(*) AS client_event
+    FROM fact_events
+    WHERE event_type IN ('video call received', 'video call sent', 'voice call received', 'voice call sent')
+    GROUP BY user_id, client_id),
+qualified_user AS(
+    SELECT
+        vc.user_id,
+        cec.client_id
+    FROM
+        event_count vc
+    JOIN 
+        client_event_count cec ON vc.user_id = cec.user_id
+    WHERE CAST(cec.client_event AS FLOAT)/vc.total_event >= 0.5)
+SELECT TOP 1 client_id
+FROM qualified_user
+GROUP BY client_id
+ORDER BY COUNT(*) DESC
+
+
+
+    
