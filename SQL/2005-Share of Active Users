@@ -1,0 +1,8 @@
+SELECT CAST(active_us AS FLOAT)*100/total 
+FROM(
+    SELECT
+        COUNT(*) AS total,
+        SUM(CASE 
+                WHEN status = 'open' and country = 'USA' 
+                THEN 1 ELSE 0 END) AS active_us
+    FROM fb_active_users) AS sub
