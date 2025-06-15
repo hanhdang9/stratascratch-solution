@@ -1,0 +1,8 @@
+SELECT block_reason, count(*) AS number_of_user
+FROM fb_blocked_users
+WHERE block_date <= '2021-12-31'
+    AND(
+        DATEADD(day, CAST(block_duration AS INT), block_date) >= '2021-12-01'
+        OR 
+        block_duration IS NULL)
+GROUP BY block_reason
