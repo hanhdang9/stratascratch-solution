@@ -1,0 +1,9 @@
+-- Find the day diff: between hire_date and termination_date, if termination_date is null -> use "today"
+SELECT
+    first_name,
+    last_name,
+    CASE WHEN termination_date IS NOT NULL THEN 'Yes' ELSE 'No' END AS still_working,
+    DATEDIFF(year, hire_date, COALESCE(termination_date, CAST('2021-05-01' AS DATE))) as year_count
+FROM uber_employees
+WHERE
+    DATEDIFF(day, hire_date, COALESCE(termination_date, CAST('2021-05-01' AS DATE))) >= 730
