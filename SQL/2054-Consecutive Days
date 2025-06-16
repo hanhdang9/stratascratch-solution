@@ -1,0 +1,28 @@
+WITH
+    distinct_event AS(
+        SELECT 
+            DISTINCT record_date,
+            user_id
+        FROM sf_events),
+    rn AS(
+        SELECT
+            record_date,
+            user_id,
+            ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY record_date) AS rn
+        FROM distinct_event),
+    group_dates AS(
+        SELECT
+            record_date,
+            user_id,
+            DATEADD(day, -rn, record_date) AS group_date
+        FROM rn),
+    count_consecutive AS(
+        SELECT
+            group_date,
+            user_id,
+            count(*) AS count_consecutive
+        FROM group_dates
+        GROUP BY group_date, user_id)
+SELECT distinct user_id
+FROM count_consecutive
+WHERE count_consecutive >=3
