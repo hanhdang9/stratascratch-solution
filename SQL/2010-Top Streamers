@@ -1,0 +1,25 @@
+-- Count streaming and viewing sessions of each user
+WITH
+    session_type AS(
+        SELECT
+            user_id,
+            SUM(CASE WHEN session_type = 'streamer' THEN 1 ELSE 0 END) AS streamer,
+            SUM(CASE WHEN session_type = 'viewer' THEN 1 ELSE 0 END) AS viewer
+        FROM twitch_sessions
+        GROUP BY user_id),
+-- Calculate how many sessions each user has
+    total_session AS(
+        SELECT
+            user_id,
+            count(*) AS session_count
+        FROM twitch_sessions
+        GROUP BY user_id)
+SELECT
+    TOP 3 ts.user_id,
+    st.streamer AS streaming_session,
+    st.viewer AS viewing_session
+FROM total_session ts
+JOIN session_type st
+ON ts.user_id = st.user_id
+WHERE st.streamer > st.viewer
+ORDER BY ts.session_count DESC
