@@ -1,0 +1,18 @@
+WITH
+    dt AS(
+        SELECT
+            DISTINCT user_id, created_at 
+        FROM amazon_transactions),
+    lag_table AS(
+        SELECT
+            user_id,
+            created_at,
+            -- The different between days purchased within each user
+            DATEDIFF(day, LAG(created_at) OVER(PARTITION BY user_id ORDER BY created_at), created_at) AS second_purchase,
+            -- Rank to know where is the 1st, the 2nd purchase
+            RANK() OVER(PARTITION BY user_id ORDER BY created_at) as rk
+        FROM dt)
+SELECT DISTINCT user_id 
+FROM lag_table
+WHERE second_purchase <= 7 AND rk = 2
+    
