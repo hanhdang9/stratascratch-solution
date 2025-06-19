@@ -1,0 +1,21 @@
+WITH
+    prd_num AS(
+        SELECT
+            year,
+            company_name,
+            count(*) AS prd_num
+        FROM car_launches
+        GROUP BY 
+            year,
+            company_name),
+    summarize AS(
+        SELECT
+            company_name,
+            year,
+            (LEAD(prd_num) OVER(PARTITION BY company_name ORDER BY year)) - prd_num AS net_diff
+        FROM prd_num)
+SELECT
+    company_name,
+    net_diff
+FROM summarize
+WHERE year = 2019
