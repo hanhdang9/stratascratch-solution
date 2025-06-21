@@ -1,0 +1,10 @@
+SELECT
+    TOP 1 c.first_name,
+    o.order_date,
+    SUM(o.total_order_cost) AS total_order_cost
+FROM
+    orders o
+    JOIN customers c
+    ON o.cust_id = c.id
+GROUP BY c.first_name, o.order_date
+ORDER BY SUM(o.total_order_cost) DESC
