@@ -1,0 +1,14 @@
+WITH summarize AS
+    (SELECT
+        date,
+        SUM(CASE WHEN paying_customer = 'no' THEN downloads ELSE 0 END) AS non_paying,
+        SUM(CASE WHEN paying_customer = 'yes' THEN downloads ELSE 0 END) AS paying 
+    FROM ms_download_facts x
+    JOIN ms_user_dimension ud
+    ON x.user_id = ud.user_id
+    JOIN ms_acc_dimension ad
+    ON ud.acc_id = ad.acc_id
+    GROUP BY date)
+SELECT * FROM summarize
+WHERE non_paying > paying
+ORDER BY date
